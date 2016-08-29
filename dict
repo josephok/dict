@@ -10,6 +10,11 @@ Purple='\033[0;35m'
 Cyan='\033[0;36m'
 LightGray='\033[0;37m'
 
+if [[ $# -lt 1 ]];then
+    echo -e "${Cyan}Usage: dict word${NC}"
+    exit 127
+fi
+
 baseurl1='http://fanyi.youdao.com/openapi.do?keyfrom=fanyi-node&key=593554388&type=data&doctype=json&version=1.2'
 baseurl2='http://dict-co.iciba.com/api/dictionary.php?key=D191EBD014295E913574E1EAF8E06666'
 
