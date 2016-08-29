@@ -1,0 +1,88 @@
+#!/bin/bash
+
+NC='\033[0m'
+Black='\033[0;30m'
+Red='\033[0;31m'
+Green='\033[0;32m'
+Brown='\033[0;33m'
+Blue='\033[0;34m'
+Purple='\033[0;35m'
+Cyan='\033[0;36m'
+LightGray='\033[0;37m'
+
+baseurl1='http://fanyi.youdao.com/openapi.do?keyfrom=fanyi-node&key=593554388&type=data&doctype=json&version=1.2'
+baseurl2='http://dict-co.iciba.com/api/dictionary.php?key=D191EBD014295E913574E1EAF8E06666'
+
+word=$@
+
+# Youdao dict
+result=$(curl -s --data-urlencode "q=${word}" "$baseurl1")
+
+phonetic=$(echo $result | jq .basic.phonetic | sed 's/"//g')
+echo
+echo -e " $word 发音：${Purple}[ $phonetic ]${NC}" "~ 有道"
+echo
+
+printf "${Green}"
+echo $result | jq .basic.explains | sed -e 's/"//g' -e '/\[/d' -e '/\]/d' -e 's/^/-/'
+echo -e "${NC}"
+weblength=$(echo $result | jq ".web | length")
+
+let i=0
+while [[ i -lt weblength ]]; do
+    printf "%d. " $((i+1))
+    echo $result | jq .web | jq .[$i].key | sed 's/"//g'
+    printf "${Cyan}   "; echo $result | jq .web | jq .[$i].value | sed '/\]/d;/\[/d' | xargs
+    printf "${NC}"
+
+    let i++
+done
+
+echo
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+# Iciba dict
+result=$(curl -s --data-urlencode "w=${word}" "$baseurl2" | xml2json)
+phonetic=$(echo $result | jq ".dict.ps")
+phoneticlength=$(echo $result | jq ".dict.ps | length")
+if [[ phoneticlength -eq 1 ]]; then
+    p=$(echo $phonetic | grep '$t' | cut -d":" -f2 | sed 's/}//g;s/"//g')
+    echo
+    echo -e " $word 发音：${Purple}[ ${p} ]${NC}" "~ 爱词霸"
+    echo
+else
+    p1=$(echo $phonetic | jq .[0] | grep '$t' | cut -d":" -f2 | sed 's/"//g')
+    p2=$(echo $phonetic | jq .[1] | grep '$t' | cut -d":" -f2 | sed 's/"//g')
+    echo
+    echo -e " $word 发音：英${Purple}[${p1} ]${NC} 美${Purple}[${p2} ]${NC}" "~ 爱词霸"
+    echo
+fi
+
+poslength=$(echo $result | jq ".dict.pos | length")
+if [[ poslength -eq 1 ]]; then
+    pos=$(echo $result | jq .dict.pos | grep '$t' | cut -d":" -f2 | sed 's/"//g')
+    acceptation=$(echo $result | jq .dict.acceptation | grep '$t' | cut -d":" -f2 | sed 's/"//g')
+    echo -e "${Green}-${pos}${acceptation}${NC}"
+else
+    let i=0
+    while [[ i -lt poslength ]]; do
+        pos=$(echo $result | jq .dict.pos | jq ".[$i]" | grep '$t' | cut -d":" -f2 | sed 's/"//g')
+        acceptation=$(echo $result | jq .dict.acceptation | jq ".[$i]" | grep '$t' | cut -d":" -f2 | sed 's/"//g')
+        echo -e "${Green}-${pos}${acceptation}${NC}"
+
+        let i++
+    done
+fi
+
+echo
+
+sentlength=$(echo $result | jq ".dict.sent | length")
+let i=0
+while [[ i -lt sentlength ]]; do
+    orig=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .orig | grep '$t' | cut -d":" -f2 | sed 's/"//g' | sed 's/\\/"/g')
+    trans=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .trans | grep '$t' | cut -d":" -f2 | sed 's/"//g' | sed 's/\\/"/g')
+    echo "$((i+1)). ${orig}"
+    echo -e "${Cyan}   ${trans}${NC}"
+    let i++
+done
+echo
