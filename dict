@@ -84,8 +84,8 @@ echo
 sentlength=$(echo $result | jq ".dict.sent | length")
 let i=0
 while [[ i -lt sentlength ]]; do
-    orig=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .orig | grep '$t' | cut -d":" -f2 | sed 's/"//g' | sed 's/\\/"/g')
-    trans=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .trans | grep '$t' | cut -d":" -f2 | sed 's/"//g' | sed 's/\\/"/g')
+    orig=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .orig | grep '$t' | cut -d":" -f2- | sed 's/"//g' | sed 's/\\/"/g')
+    trans=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .trans | grep '$t' | cut -d":" -f2- | sed 's/"//g' | sed 's/\\/"/g')
     echo "$((i+1)). ${orig}"
     echo -e "${Cyan}   ${trans}${NC}"
     let i++
