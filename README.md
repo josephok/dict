@@ -33,6 +33,13 @@ $ sudo npm install -g xml2json-command
 
 直接下载到本地，然后拷贝到你的$PATH路径目录下，比如~/bin，就可以执行了。
 
+## 发音
+
+只要安装了`mpg123`就可以使用发音了。
+```bash
+$ sudo apt install -y mpg123
+```
+
 # 使用
 
 ```
