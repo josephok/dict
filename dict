@@ -94,7 +94,12 @@ echo
 
 which mpg123 &> /dev/null
 if [[ $? -eq 0 ]]; then
-    mp3=$(echo $result | jq .dict.pron | jq .[0] | sed 's/[{}]//g' | cut -d":" -f2- | sed 's/"//g')
+    pronlength=$(echo $result | jq ".dict.pron | length")
+    if [[ $pronlength -eq 1 ]]; then
+        mp3=$(echo $result | jq .dict.pron | sed 's/[{}]//g' | cut -d":" -f2- | sed 's/"//g')
+    else
+        mp3=$(echo $result | jq .dict.pron | jq .[0] | sed 's/[{}]//g' | cut -d":" -f2- | sed 's/"//g')
+    fi
     mpg123 $mp3 &> /dev/null
 fi
 
