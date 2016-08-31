@@ -10,8 +10,16 @@ Purple='\033[0;35m'
 Cyan='\033[0;36m'
 LightGray='\033[0;37m'
 
+function echo_cyan() {
+    echo -e "${Cyan}$@${NC}"
+}
+
+function echo_green() {
+    echo -e "${Green}$@${NC}"
+}
+
 if [[ $# -lt 1 ]];then
-    echo -e "${Cyan}Usage: dict word${NC}"
+    echo_cyan "Usage: dict word"
     exit 127
 fi
 
@@ -37,8 +45,7 @@ let i=0
 while [[ i -lt weblength ]]; do
     printf "%d. " $((i+1))
     echo $result | jq .web | jq .[$i].key | sed 's/"//g'
-    printf "${Cyan}   "; echo $result | jq .web | jq .[$i].value | sed '/\]/d;/\[/d' | xargs
-    printf "${NC}"
+    echo_cyan "  " $(echo $result | jq .web | jq .[$i].value | sed '/\]/d;/\[/d' | xargs)
 
     let i++
 done
@@ -67,13 +74,13 @@ poslength=$(echo $result | jq ".dict.pos | length")
 if [[ poslength -eq 1 ]]; then
     pos=$(echo $result | jq .dict.pos | grep '$t' | cut -d":" -f2 | sed 's/"//g')
     acceptation=$(echo $result | jq .dict.acceptation | grep '$t' | cut -d":" -f2 | sed 's/"//g')
-    echo -e "${Green}-${pos}${acceptation}${NC}"
+    echo_green "-${pos}${acceptation}"
 else
     let i=0
     while [[ i -lt poslength ]]; do
         pos=$(echo $result | jq .dict.pos | jq ".[$i]" | grep '$t' | cut -d":" -f2 | sed 's/"//g')
         acceptation=$(echo $result | jq .dict.acceptation | jq ".[$i]" | grep '$t' | cut -d":" -f2 | sed 's/"//g')
-        echo -e "${Green}-${pos}${acceptation}${NC}"
+        echo_green "-${pos}${acceptation}"
 
         let i++
     done
@@ -87,7 +94,7 @@ while [[ i -lt sentlength ]]; do
     orig=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .orig | grep '$t' | cut -d":" -f2- | sed 's/"//g' | sed 's/\\/"/g')
     trans=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .trans | grep '$t' | cut -d":" -f2- | sed 's/"//g' | sed 's/\\/"/g')
     echo "$((i+1)). ${orig}"
-    echo -e "${Cyan}   ${trans}${NC}"
+    echo_cyan "   ${trans}"
     let i++
 done
 echo
