@@ -41,13 +41,10 @@ echo $result | jq .basic.explains | sed -e 's/"//g' -e '/\[/d' -e '/\]/d' -e 's/
 echo -e "${NC}"
 weblength=$(echo $result | jq ".web | length")
 
-let i=0
-while [[ i -lt weblength ]]; do
+for (( i = 0; i < weblength; i++ )); do
     printf "%d. " $((i+1))
     echo $result | jq .web | jq .[$i].key | sed 's/"//g'
     echo_cyan "  " $(echo $result | jq .web | jq .[$i].value | sed '/\]/d;/\[/d' | xargs)
-
-    let i++
 done
 
 echo
@@ -76,26 +73,22 @@ if [[ poslength -eq 1 ]]; then
     acceptation=$(echo $result | jq .dict.acceptation | grep '$t' | cut -d":" -f2 | sed 's/"//g')
     echo_green "-${pos}${acceptation}"
 else
-    let i=0
-    while [[ i -lt poslength ]]; do
+    for (( i = 0; i < poslength; i++ )); do
         pos=$(echo $result | jq .dict.pos | jq ".[$i]" | grep '$t' | cut -d":" -f2 | sed 's/"//g')
         acceptation=$(echo $result | jq .dict.acceptation | jq ".[$i]" | grep '$t' | cut -d":" -f2 | sed 's/"//g')
         echo_green "-${pos}${acceptation}"
-
-        let i++
     done
 fi
 
 echo
 
 sentlength=$(echo $result | jq ".dict.sent | length")
-let i=0
-while [[ i -lt sentlength ]]; do
+
+for (( i = 0; i < sentlength; i++ )); do
     orig=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .orig | grep '$t' | cut -d":" -f2- | sed 's/"//g' | sed 's/\\/"/g')
     trans=$(echo $result | jq .dict.sent | jq ".[$i]" | jq .trans | grep '$t' | cut -d":" -f2- | sed 's/"//g' | sed 's/\\/"/g')
     echo "$((i+1)). ${orig}"
     echo_cyan "   ${trans}"
-    let i++
 done
 echo
 
